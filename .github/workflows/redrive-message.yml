@@ -6,10 +6,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  
   retry-job:
     permissions: write-all
     runs-on: ubuntu-latest
+
+    outputs:
+      num_try: ${{ steps.set-num-try.outputs.num_try }}
 
     steps:
       - name: Checkout
@@ -22,9 +24,13 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
-    
+
       - name: Prepare Retry Count
-        run: echo "NUM_TRY=$(( $(echo '${{ github.event.client_payload.num_tries }}' | tr -d '"') + 1 ))" >> $GITHUB_ENV
+        id: set-num-try
+        run: |
+          NUM_TRY=$(( ${{ github.event.client_payload.num_tries || 0 }} + 1 ))
+          echo "NUM_TRY=$NUM_TRY"
+          echo "num_try=$NUM_TRY" >> "$GITHUB_OUTPUT"
 
       - name: Run main script
         id: run-script
@@ -33,7 +39,7 @@ jobs:
   redrive:
     permissions: write-all
     needs: retry-job
-    if: ${{ failure() && fromJson(github.event.client_payload.num_tries) < 2 }}
+    if: ${{ failure() && needs.retry-job.outputs.num_try < 3 }}
     runs-on: ubuntu-latest
 
     steps:
@@ -41,15 +47,17 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           event-type: redrive-messages
-          client-payload: '{"num_tries": "${{ env.NUM_TRY }}" }'
+          client-payload: >-
+            {
+              "num_tries": "${{ needs.retry-job.outputs.num_try }}"
+            }
 
   notify-failure:
     permissions: write-all
     needs: retry-job
-    if: ${{ failure() && fromJson(github.event.client_payload.num_tries) == 2 }}
+    if: ${{ failure() && needs.retry-job.outputs.num_try == 3 }}
     runs-on: ubuntu-latest
 
     steps:
       - name: Notify on final failure
-        run: echo "Final attempt failed. Send notification here." # Replace with Slack, Discord, email, etc.
-
+        run: echo "Final attempt failed. Send notification here."
