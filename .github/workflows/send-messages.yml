@@ -1,12 +1,11 @@
 name: Send Messages
 
 on:
-  repository_dispatch:
-    types: [redrive-messages]
   schedule:
     - cron: '*/5 * * * *'
+  repository_dispatch:
+    types: [redrive-messages]
   workflow_dispatch:
-  push:
 
 env:
   MAX_TRIES: 2
