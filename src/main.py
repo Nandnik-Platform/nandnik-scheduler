@@ -1,11 +1,17 @@
 # Importing the Environment Variables
+import sys
 from dotenv import load_dotenv
 import os
 load_dotenv()
 CLASSES_ID = os.getenv("NOTION_DB_ID_classes")
 INSTRUCTORS_ID = os.getenv("NOTION_DB_ID_instructors")
 STUDENTS_ID = os.getenv("NOTION_DB_ID_students")
-DEBUG=True
+
+DEBUG = "debug" in sys.argv
+if DEBUG:
+    DEBUG = True if DEBUG=="True" else False
+else:
+    DEBUG = True
 
 from notion_utils import get_database
 from time_utils import get_current_time

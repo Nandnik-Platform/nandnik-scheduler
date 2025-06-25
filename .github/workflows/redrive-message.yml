@@ -1,0 +1,53 @@
+name: Redrive Messages
+
+on:
+  repository_dispatch:
+    types: [redrive-messages]
+  workflow_dispatch:
+
+jobs:
+  retry-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+    
+      - name: Prepare Retry Count
+        run: echo "NUM_TRY=$(( ${{ github.event.client_payload.num_tries }} + 1 ))" >> $GITHUB_ENV
+
+      - name: Run main script
+        id: run-script
+        run: python src/main.py
+
+    continue-on-error: true # Always finish so we can evaluate in post-step
+
+  redrive:
+    needs: retry-job
+    if: ${{ failure() && fromJson(github.event.client_payload.num_tries) < 3 }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Redrive workflow
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          event-type: redrive-messages
+          client-payload: '{"num_tries": ${{ env.NUM_TRY }} }'
+
+  notify-failure:
+    needs: retry-job
+    if: ${{ failure() && fromJson(github.event.inputs.NUM_TRY) == 3 }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Notify on final failure
+        run: echo "Final attempt failed. Send notification here." # Replace with Slack, Discord, email, etc.
+
