@@ -6,7 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
+  
   retry-job:
+    permissions: write-all
     runs-on: ubuntu-latest
 
     steps:
@@ -29,6 +31,7 @@ jobs:
         run: python src/main.py
 
   redrive:
+    permissions: write-all
     needs: retry-job
     if: ${{ failure() && fromJson(github.event.client_payload.num_tries) < 3 }}
     runs-on: ubuntu-latest
@@ -41,6 +44,7 @@ jobs:
           client-payload: '{"num_tries": "${{ env.NUM_TRY }}" }'
 
   notify-failure:
+    permissions: write-all
     needs: retry-job
     if: ${{ failure() && fromJson(github.event.inputs.NUM_TRY) == 3 }}
     runs-on: ubuntu-latest
