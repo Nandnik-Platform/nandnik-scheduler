@@ -38,7 +38,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           event-type: redrive-messages
-          client-payload: '{"num_tries": ${{ env.NUM_TRY }} }'
+          client-payload: '{"num_tries": "${{ env.NUM_TRY }}" }'
 
   notify-failure:
     needs: retry-job
