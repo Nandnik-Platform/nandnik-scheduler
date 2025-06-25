@@ -1,8 +1,9 @@
+# Local Development Imports
+# from dotenv import load_dotenv
+# load_dotenv()
 # Importing the Environment Variables
 import sys
-from dotenv import load_dotenv
 import os
-load_dotenv()
 CLASSES_ID = os.getenv("NOTION_DB_ID_classes")
 INSTRUCTORS_ID = os.getenv("NOTION_DB_ID_instructors")
 STUDENTS_ID = os.getenv("NOTION_DB_ID_students")
