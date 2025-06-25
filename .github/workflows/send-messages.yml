@@ -26,8 +26,7 @@ jobs:
 
       - name: Run script
         id: run-script
-        # run: python src/main.py --debug=True
-        run: exit 0
+        run: python src/main.py --debug=True
         continue-on-error: false
 
   redrive:
