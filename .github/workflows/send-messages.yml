@@ -36,7 +36,7 @@ jobs:
       - name: Run script
         id: run-script
         env:
-          # NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DB_ID_classes: ${{ secrets.NOTION_DB_ID_CLASSES }}
           NOTION_DB_ID_instructors: ${{ secrets.NOTION_DB_ID_INSTRUCTORS }}
           NOTION_DB_ID_students: ${{ secrets.NOTION_DB_ID_STUDENTS }}
