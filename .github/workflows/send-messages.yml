@@ -29,9 +29,18 @@ jobs:
         run: python src/main.py --debug=True
         continue-on-error: false
 
-      - name: Trigger redrive on failure
-        if: failure() && steps.run-script.result != 'success'
+  redrive:
+    permissions: write-all
+    needs: send-messages
+    if: ${{ failure() }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Redrive workflow
         uses: peter-evans/repository-dispatch@v3
         with:
           event-type: redrive-messages
-          client-payload: '{"num_tries": "1"}'
+          client-payload: >-
+            {
+              "num_tries": "${{ 1 }}"
+            }
