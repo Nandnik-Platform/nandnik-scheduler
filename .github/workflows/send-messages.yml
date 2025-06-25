@@ -25,15 +25,15 @@ jobs:
       - name: Run script
         id: run-script
         run: python src/main.py --debug=True
-        continue-on-error: true # Always finish so we can evaluate in post-step
+        continue-on-error: true
 
   redrive:
     runs-on: ubuntu-latest
     needs: send-messages
-    if: failure()  # ✅ Only runs if previous steps failed
+    if: needs.send-messages.result == 'failure'
     steps:
       - name: Trigger redrive on failure
         uses: peter-evans/repository-dispatch@v3
         with:
           event-type: redrive-messages
-          client-payload: '{"num_tries": ${{ 1 }}}'
+          client-payload: '{"num_tries": "1"}'
