@@ -54,7 +54,7 @@ jobs:
   redrive:
     permissions: write-all
     needs: send-messages
-    if: ${{ failure() && needs.send-messages.outputs.num_try < github.env.MAX_TRIES }}
+    if: ${{ failure() && needs.send-messages.outputs.num_try < 2 }}
     runs-on: ubuntu-latest
 
     steps:
@@ -70,7 +70,7 @@ jobs:
   notify-failure:
     permissions: write-all
     needs: send-messages
-    if: ${{ failure() && needs.send-messages.outputs.num_try == github.env.MAX_TRIES }}
+    if: ${{ failure() && needs.send-messages.outputs.num_try == 2 }}
     runs-on: ubuntu-latest
 
     steps:
