@@ -33,7 +33,7 @@ jobs:
   redrive:
     permissions: write-all
     needs: retry-job
-    if: ${{ failure() && fromJson(github.event.client_payload.num_tries) < 3 }}
+    if: ${{ failure() && fromJson(github.event.client_payload.num_tries) < 2 }}
     runs-on: ubuntu-latest
 
     steps:
@@ -46,7 +46,7 @@ jobs:
   notify-failure:
     permissions: write-all
     needs: retry-job
-    if: ${{ failure() && fromJson(github.event.inputs.NUM_TRY) == 3 }}
+    if: ${{ failure() && fromJson(github.event.client_payload.num_tries) == 2 }}
     runs-on: ubuntu-latest
 
     steps:
