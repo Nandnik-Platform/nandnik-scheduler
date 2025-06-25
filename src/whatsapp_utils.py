@@ -1,12 +1,17 @@
 import requests
 import os
 from time_utils import format_time_ist
+from main import DEBUG
 
+WHATSAPP_API_TOKEN = os.getenv("WHATSAPP_API_TOKEN")
+
+if DEBUG:
+    print("WHATSAPP_API_TOKEN:", WHATSAPP_API_TOKEN)
 
 def send_whatsapp_message(text, phone_number):
     url = "https://api.ultramsg.com/instance127328/messages/chat"
     payload = {
-        "token": os.getenv("WHATSAPP_API_TOKEN"),
+        "token": WHATSAPP_API_TOKEN,
         "to": phone_number,
         "body": text
     }

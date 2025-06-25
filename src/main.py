@@ -17,6 +17,10 @@ from notion_utils import get_database
 from time_utils import get_current_time
 from whatsapp_utils import send_whatsapp_message, prepare_message
 
+if DEBUG:
+    print("CLASSES_ID:", CLASSES_ID)
+    print("INSTRUCTORS_ID:", INSTRUCTORS_ID)
+    print("STUDENTS_ID:", STUDENTS_ID)
 
 def main():
     # Fetch the Classes Database
