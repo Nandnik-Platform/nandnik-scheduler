@@ -1,15 +1,23 @@
 name: Send Messages
 
 on:
+  repository_dispatch:
+    types: [redrive-messages]
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
   push:
 
+env:
+  MAX_TRIES: 2
+
 jobs:
   send-messages:
     permissions: write-all
     runs-on: ubuntu-latest
+    outputs:
+      num_try: ${{ steps.set-num-try.outputs.num_try }}
+
 
     steps:
       - name: Checkout
@@ -26,13 +34,27 @@ jobs:
 
       - name: Run script
         id: run-script
+        env:
+          # NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DB_ID_classes: ${{ secrets.NOTION_DB_ID_CLASSES }}
+          NOTION_DB_ID_instructors: ${{ secrets.NOTION_DB_ID_INSTRUCTORS }}
+          NOTION_DB_ID_students: ${{ secrets.NOTION_DB_ID_STUDENTS }}
+          WHATSAPP_API_TOKEN: ${{ secrets.WHATSAPP_API_TOKEN }}
         run: python src/main.py --debug=True
-        continue-on-error: false
+      
+      - name: Prepare Retry Count
+        if: ${{ failure() && steps.run-script.outcome != 'success' }}
+        id: set-num-try
+        run: |
+          NUM_TRY=$(( ${{ github.event.client_payload.num_tries || 0 }} + 1 ))
+          echo "NUM_TRY=$NUM_TRY"
+          echo "num_try=$NUM_TRY" >> "$GITHUB_OUTPUT"
+        
 
   redrive:
     permissions: write-all
     needs: send-messages
-    if: ${{ failure() }}
+    if: ${{ failure() && needs.send-messages.outputs.num_try < github.env.MAX_TRIES }}
     runs-on: ubuntu-latest
 
     steps:
@@ -42,5 +64,15 @@ jobs:
           event-type: redrive-messages
           client-payload: >-
             {
-              "num_tries": "${{ 1 }}"
+              "num_tries": "${{ needs.send-messages.outputs.num_try }}"
             }
+
+  notify-failure:
+    permissions: write-all
+    needs: send-messages
+    if: ${{ failure() && needs.send-messages.outputs.num_try == github.env.MAX_TRIES }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Notify on final failure
+        run: echo "Final attempt failed. Send notification here."
