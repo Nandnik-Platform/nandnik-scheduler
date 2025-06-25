@@ -25,7 +25,7 @@ jobs:
       - name: Run script
         id: run-script
         run: python src/main.py --debug=True
-      continue-on-error: true # Always finish so we can evaluate in post-step
+        continue-on-error: true # Always finish so we can evaluate in post-step
 
   redrive:
     runs-on: ubuntu-latest
