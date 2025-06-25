@@ -1,0 +1,21 @@
+name: Send Messages
+
+on:
+  workflow_dispatch:
+
+jobs:
+  send-messages:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Force Fail
+        run: exit 1  # Intentional failure for test
+
+  redrive:
+    runs-on: ubuntu-latest
+    needs: send-messages
+    if: needs.send-messages.result == 'failure'
+
+    steps:
+      - name: Notify
+        run: echo "Redrive triggered because send-messages failed"
