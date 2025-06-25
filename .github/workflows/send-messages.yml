@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       num_try: ${{ steps.set-num-try.outputs.num_try }}
+      max_tries: ${{ steps.export-max-tries.outputs.max_tries }}
 
 
     steps:
@@ -49,12 +50,18 @@ jobs:
           NUM_TRY=$(( ${{ github.event.client_payload.num_tries || 0 }} + 1 ))
           echo "NUM_TRY=$NUM_TRY"
           echo "num_try=$NUM_TRY" >> "$GITHUB_OUTPUT"
+
+      - name: Export max tries
+        if: always()
+        id: export-max-tries
+        run: |
+          echo "max_tries=$MAX_TRIES" >> "$GITHUB_OUTPUT"
         
 
   redrive:
     permissions: write-all
     needs: send-messages
-    if: ${{ failure() && needs.send-messages.outputs.num_try < 2 }}
+    if: ${{ failure() && needs.send-messages.outputs.num_try < needs.send-messages.outputs.max_tries }}
     runs-on: ubuntu-latest
 
     steps:
@@ -70,7 +77,7 @@ jobs:
   notify-failure:
     permissions: write-all
     needs: send-messages
-    if: ${{ failure() && needs.send-messages.outputs.num_try == 2 }}
+    if: ${{ failure() && needs.send-messages.outputs.num_try == needs.send-messages.outputs.max_tries }}
     runs-on: ubuntu-latest
 
     steps:
