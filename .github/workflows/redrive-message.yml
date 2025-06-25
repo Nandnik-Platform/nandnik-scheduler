@@ -22,13 +22,11 @@ jobs:
         run: pip install -r requirements.txt
     
       - name: Prepare Retry Count
-        run: echo "NUM_TRY=$(( ${{ github.event.client_payload.num_tries }} + 1 ))" >> $GITHUB_ENV
+        run: echo "NUM_TRY=$(( $(echo '${{ github.event.client_payload.num_tries }}' | tr -d '"') + 1 ))" >> $GITHUB_ENV
 
       - name: Run main script
         id: run-script
         run: python src/main.py
-
-    continue-on-error: true # Always finish so we can evaluate in post-step
 
   redrive:
     needs: retry-job
