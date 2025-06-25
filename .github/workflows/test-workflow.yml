@@ -1,4 +1,4 @@
-name: Send Messages
+name: Test Workflow
 
 on:
   workflow_dispatch:
