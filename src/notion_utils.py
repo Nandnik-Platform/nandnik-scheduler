@@ -1,14 +1,16 @@
 import requests
 from datetime import datetime
 import os
-from main import DEBUG
+import sys
 
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
 NOTION_VERSION = "2022-06-28"
 
+DEBUG = "debug" in sys.argv
 if DEBUG:
-    print("NOTION_TOKEN:", NOTION_TOKEN)
-    print("NOTION_VERSION:", NOTION_VERSION)
+    DEBUG = True if DEBUG=="True" else False
+else:
+    DEBUG = True
 
 def get_database(ID, log=False):
     url = f"https://api.notion.com/v1/databases/{ID}/query"
