@@ -27,12 +27,8 @@ jobs:
         run: python src/main.py --debug=True
         continue-on-error: false
 
-  redrive:
-    runs-on: ubuntu-latest
-    needs: send-messages
-    if: needs.send-messages.result == 'failure'
-    steps:
       - name: Trigger redrive on failure
+        if: failure() && needs.send-messages.result != 'failure'
         uses: peter-evans/repository-dispatch@v3
         with:
           event-type: redrive-messages
