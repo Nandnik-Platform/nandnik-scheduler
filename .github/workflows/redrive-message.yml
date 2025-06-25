@@ -39,7 +39,7 @@ jobs:
   redrive:
     permissions: write-all
     needs: retry-job
-    if: ${{ failure() && needs.retry-job.outputs.num_try < 3 }}
+    if: ${{ failure() && needs.retry-job.outputs.num_try < 2 }}
     runs-on: ubuntu-latest
 
     steps:
@@ -55,7 +55,7 @@ jobs:
   notify-failure:
     permissions: write-all
     needs: retry-job
-    if: ${{ failure() && needs.retry-job.outputs.num_try == 3 }}
+    if: ${{ failure() && needs.retry-job.outputs.num_try == 2 }}
     runs-on: ubuntu-latest
 
     steps:
