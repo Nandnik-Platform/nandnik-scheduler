@@ -1,29 +1,30 @@
-name: Test
+name: Job Status Example
 
-on:
-  workflow_dispatch:
+on: [push]
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - run: echo "Building..."
+  
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - run: echo "Running tests..."
+      - run: exit 1  # simulate test failure
 
-    # Mock to test workflow
-    - name: Test app
-      id: test-app # will be referenced later
-      run: |
-        echo "Testing app (randomly fails)"
-        if [[ $(($RANDOM % 2)) == 0 ]]; then exit 0; else exit 1; fi
+  notify-success:
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ success() }}
+    steps:
+      - run: echo "✅ Tests passed!"
 
-    # runs always
-    - name: test-clean
-      if: always()
-      run: echo "Cleanup after tests"
-
-    # runs if previous jobs failed and test-app was not successful (failure/cancelled)
-    - name: action-slack
-      if: failure() && steps.test-app.outcome != 'success'
-      run: |
-        echo "Run action-slack"
-        echo "Result of test-app was '${{ steps.test-app.outcome }}'"
+  notify-failure:
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ failure() }}
+    steps:
+      - run: echo "❌ Tests failed!"
