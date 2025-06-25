@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
+  push:
 
 jobs:
   send-messages:
@@ -29,7 +30,7 @@ jobs:
         continue-on-error: false
 
       - name: Trigger redrive on failure
-        if: failure() && needs.send-messages.result != 'failure'
+        if: failure() && steps.run-script.result != 'success'
         uses: peter-evans/repository-dispatch@v3
         with:
           event-type: redrive-messages
